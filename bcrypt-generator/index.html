@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCrypt Hash Generator</title>
+    <!-- Using bcryptjs from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #34495e;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        input[type="text"]:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        select {
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            background-color: white;
+            width: 100px;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        .button-row {
+            display: flex;
+            margin-top: 15px;
+        }
+        .generate-btn {
+            flex-grow: 1;
+            background-color: #2ecc71;
+        }
+        .generate-btn:hover {
+            background-color: #27ae60;
+        }
+        .copy-btn {
+            background-color: #9b59b6;
+        }
+        .copy-btn:hover {
+            background-color: #8e44ad;
+        }
+        .result-container {
+            margin-top: 25px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+        }
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .result-title {
+            font-weight: 500;
+            color: #2c3e50;
+            margin: 0;
+        }
+        .result-box {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 12px;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 14px;
+            min-height: 20px;
+        }
+        .info-text {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .copied-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
+            animation: fadeInOut 2s ease;
+        }
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BCrypt Hash Generator</h1>
+        
+        <div class="input-group">
+            <label for="inputString">Text to Hash:</label>
+            <input type="text" id="inputString" placeholder="Enter your text here">
+            <div class="info-text">Your input will be encrypted using the BCrypt algorithm</div>
+        </div>
+        
+        <div class="input-group">
+            <label for="saltRounds">Salt Rounds:</label>
+            <select id="saltRounds">
+                <option value="10" selected>10 (default)</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+            </select>
+            <div class="info-text">Higher rounds = more secure but slower</div>
+        </div>
+        
+        <button class="generate-btn" onclick="generateHash()">Generate Hash</button>
+        
+        <div class="result-container">
+            <div class="result-header">
+                <h3 class="result-title">Generated Hash:</h3>
+                <button class="copy-btn" onclick="copyToClipboard()" id="copyButton" style="display:none;">Copy</button>
+            </div>
+            <div class="result-box" id="result"></div>
+        </div>
+    </div>
+
+    <div class="copied-alert" id="copiedAlert">Copied to clipboard!</div>
+
+    <script>
+        function generateHash() {
+            const inputString = document.getElementById('inputString').value;
+            const saltRounds = parseInt(document.getElementById('saltRounds').value);
+            const resultDiv = document.getElementById('result');
+            
+            if (!inputString) {
+                resultDiv.textContent = "Please enter text to hash";
+                document.getElementById('copyButton').style.display = 'none';
+                return;
+            }
+            
+            resultDiv.textContent = "Generating hash...";
+            
+            // Using setTimeout to prevent UI freezing for longer operations
+            setTimeout(() => {
+                try {
+                    // Generate salt and hash
+                    const salt = dcodeIO.bcrypt.genSaltSync(saltRounds);
+                    const hash = dcodeIO.bcrypt.hashSync(inputString, salt);
+                    
+                    resultDiv.textContent = hash;
+                    document.getElementById('copyButton').style.display = 'block';
+                } catch (error) {
+                    resultDiv.textContent = "Error: " + error.message;
+                    document.getElementById('copyButton').style.display = 'none';
+                }
+            }, 10);
+        }
+        
+        function copyToClipboard() {
+            const text = document.getElementById('result').textContent;
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    const alert = document.getElementById('copiedAlert');
+                    alert.style.display = 'block';
+                    setTimeout(() => {
+                        alert.style.display = 'none';
+                    }, 2000);
+                })
+                .catch(err => console.error('Failed to copy: ', err));
+        }
+        
+        // Process URL parameters if any
+        window.addEventListener('load', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const input = urlParams.get('input');
+            
+            if (input) {
+                document.getElementById('inputString').value = input;
+                generateHash();
+            }
+        });
+    </script>
+</body>
+</html>
