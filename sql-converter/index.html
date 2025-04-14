@@ -239,7 +239,7 @@
                     showStatus(`Converting chunk ${chunkNumber}/${chunks.length}...`, 'info');
                     
                     try {
-                        const convertedChunk = await convertSqlChunk(chunk, chunkNumber, chunks.length, apiKey);
+                        const convertedChunk = await convertSqlChunk(chunk, chunkNumber, chunks.length);
                         convertedChunks.push(convertedChunk);
                         showStatus(`Chunk ${chunkNumber}/${chunks.length} converted successfully.`, 'success');
                     } catch (error) {
@@ -316,13 +316,13 @@
         }
 
         // Convert a chunk of SQL using Gemini API
-        async function convertSqlChunk(sqlChunk, chunkNumber, totalChunks, apiKey) {
+        async function convertSqlChunk(sqlChunk, chunkNumber, totalChunks) {
             let retries = 0;
             
             while (retries < CONFIG.MAX_RETRIES) {
                 try {
                     const promptContent = createPrompt(sqlChunk, chunkNumber, totalChunks);
-                    const response = await callGeminiAPI(promptContent, apiKey);
+                    const response = await callGeminiAPI(promptContent);
                     
                     // Extract the converted SQL from the response
                     const convertedSQL = extractConvertedSQL(response);
