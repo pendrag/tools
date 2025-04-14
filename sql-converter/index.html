@@ -213,18 +213,6 @@
             statusMessages.classList.remove('hidden');
             statusMessages.innerHTML = '';
             
-            // Get and validate API key
-            const apiKey = apiKeyInput.value.trim();
-            if (!apiKey) {
-                showStatus('Please enter your Gemini API key.', 'error');
-                return;
-            }
-            
-            // Save API key (if user wants)
-            if (confirm('Would you like to save your API key in browser storage for future use?')) {
-                localStorage.setItem('geminiApiKey', apiKey);
-            }
-            
             // Get and validate SQL input
             const sqlContent = inputSQL.value.trim();
             if (!sqlContent) {
