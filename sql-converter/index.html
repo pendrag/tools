@@ -185,7 +185,7 @@
     <script>
         // Configuration
         const CONFIG = {
-            GEMINI_MODEL: "gemini-2.0-flash",
+            GEMINI_MODEL: "gemini-1.5-pro",
             API_ENDPOINT: "https://generativelanguage.googleapis.com/v1beta/models/",
             MAX_CHUNK_SIZE: 30000,
             MAX_RETRIES: 3,
@@ -351,7 +351,7 @@
 I'll provide you with a chunk of MySQL SQL code (chunk ${chunkNumber} of ${totalChunks}). 
 Please convert it to PostgreSQL syntax following these rules:
 
-1. Handle data type differences (e.g., INT to INTEGER, TINYINT(1) to BOOLEAN, etc.)
+1. Handle data type differences (e.g., INT to INTEGER, TINYINT(1) to BOOLEAN, remove ENUM, etc.)
 2. Change AUTO_INCREMENT to SERIAL or BIGSERIAL as appropriate
 3. Replace backticks with double quotes for identifiers
 4. Convert ENGINE=InnoDB and other MySQL-specific table options to PostgreSQL syntax
