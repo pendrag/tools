@@ -16,9 +16,9 @@
 </head>
 <body>
 
-<h1>Planificador de Entrenamiento de Modelos LLM</h1>
+<h1>🔮​ Planificador de Entrenamiento de Modelos LLM ​</h1>
 
-<label>Tarea:
+<label>🏋️​ Tarea:
   <select id="task">
     <option value="pretraining">Preentrenamiento</option>
     <option value="sft">Fine-tuning supervisado (SFT)</option>
@@ -27,16 +27,16 @@
   </select>
 </label>
 
-<label>Modelo objetivo:
-  <select id="targetModel">
-    <option value="2">2B</option>
+<label id="sourceLabel" style="display: none;">🤰 Modelo de partida:
+  <select id="sourceModel">
     <option value="7">7B</option>
     <option value="40">40B</option>
   </select>
 </label>
 
-<label id="sourceLabel" style="display: none;">Modelo de partida:
-  <select id="sourceModel">
+<label>👶​ Modelo objetivo:
+  <select id="targetModel">
+    <option value="2">2B</option>
     <option value="7">7B</option>
     <option value="40">40B</option>
   </select>
@@ -45,14 +45,14 @@
 <button onclick="addTask()">Añadir tarea</button>
 
 <div class="task-list">
-  <h2>Tareas añadidas</h2>
+  <h2>🧾​ Tareas añadidas</h2>
   <div id="taskList"></div>
 </div>
 
 <div class="detail" id="taskDetail"></div>
 
 <div class="summary">
-  <h2>Resumen total de recursos</h2>
+  <h2>📈 Resumen total de recursos</h2>
   <div id="summaryTable"></div>
 </div>
 
