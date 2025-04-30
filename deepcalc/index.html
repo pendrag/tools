@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Planificador de Tareas LLM</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f6f6f6; }
+    label, select, button { margin: 5px; }
+    .task-list, .summary { margin-top: 20px; }
+    .task-entry { cursor: pointer; margin-bottom: 5px; padding: 8px; background: white; border: 1px solid #ccc; border-radius: 5px; }
+    .task-entry:hover { background: #eef; }
+    .detail, .summary-table { margin-top: 10px; background: #fff; padding: 10px; border-radius: 5px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ccc; padding: 5px; text-align: left; }
+  </style>
+</head>
+<body>
+
+<h1>Planificador de Entrenamiento de Modelos LLM</h1>
+
+<label>Tarea:
+  <select id="task">
+    <option value="pretraining">Preentrenamiento</option>
+    <option value="sft">Fine-tuning supervisado (SFT)</option>
+    <option value="dpo">Alineamiento (DPO)</option>
+    <option value="distillation">Destilación</option>
+  </select>
+</label>
+
+<label>Modelo objetivo:
+  <select id="targetModel">
+    <option value="2">2B</option>
+    <option value="7">7B</option>
+    <option value="40">40B</option>
+  </select>
+</label>
+
+<label id="sourceLabel" style="display: none;">Modelo de partida:
+  <select id="sourceModel">
+    <option value="7">7B</option>
+    <option value="40">40B</option>
+  </select>
+</label>
+
+<button onclick="addTask()">Añadir tarea</button>
+
+<div class="task-list">
+  <h2>Tareas añadidas</h2>
+  <div id="taskList"></div>
+</div>
+
+<div class="detail" id="taskDetail"></div>
+
+<div class="summary">
+  <h2>Resumen total de recursos</h2>
+  <div id="summaryTable"></div>
+</div>
+
+<script>
+const presets = {
+  pretraining: {
+    2: { gpus: 1, vram: 32, time: 2, gpuHours: 200, ram: 64, storage: 500, tokens: 2000 },
+    7: { gpus: 2, vram: 80, time: 5, gpuHours: 400, ram: 128, storage: 1000, tokens: 5000 },
+    40: { gpus: 16, vram: 1280, time: 10, gpuHours: 2700, ram: 1024, storage: 4000, tokens: 30000 }
+  },
+  sft: {
+    2: { gpus: 1, vram: 24, time: 1, gpuHours: 16, ram: 32, storage: 200, tokens: 300 },
+    7: { gpus: 2, vram: 80, time: 2, gpuHours: 48, ram: 128, storage: 500, tokens: 1000 },
+    40: { gpus: 8, vram: 640, time: 5, gpuHours: 480, ram: 512, storage: 2000, tokens: 3000 }
+  },
+  dpo: {
+    2: { gpus: 1, vram: 24, time: 0.5, gpuHours: 12, ram: 32, storage: 200, tokens: 200 },
+    7: { gpus: 2, vram: 80, time: 1.5, gpuHours: 36, ram: 128, storage: 500, tokens: 800 },
+    40: { gpus: 8, vram: 640, time: 3, gpuHours: 400, ram: 256, storage: 2000, tokens: 2000 }
+  },
+  distillation: {
+    "40->7": { gpus: 64, vram: 5000, time: 10, gpuHours: 80000, ram: 16000, storage: 100000, tokens: 175000 },
+    "40->2": { gpus: 32, vram: 2500, time: 5, gpuHours: 30000, ram: 8000, storage: 50000, tokens: 100000 },
+    "7->2": { gpus: 8, vram: 640, time: 2, gpuHours: 5000, ram: 256, storage: 2000, tokens: 30000 }
+  }
+};
+
+const taskList = [];
+const taskListElement = document.getElementById("taskList");
+const detailElement = document.getElementById("taskDetail");
+const summaryElement = document.getElementById("summaryTable");
+
+function addTask() {
+  const task = document.getElementById("task").value;
+  const target = document.getElementById("targetModel").value;
+  const source = document.getElementById("sourceModel").value;
+
+  let key = task === "distillation" ? `${source}->${target}` : target;
+  const data = presets[task][key];
+  if (!data) {
+    alert("No hay datos disponibles para esta configuración.");
+    return;
+  }
+
+  const taskObj = {
+    id: Date.now(),
+    name: `${task.toUpperCase()} (${task === "distillation" ? `${source}B → ${target}B` : `${target}B`})`,
+    ...data
+  };
+
+  taskList.push(taskObj);
+  renderTasks();
+  updateSummary();
+}
+
+function renderTasks() {
+  taskListElement.innerHTML = "";
+  taskList.forEach(task => {
+    const div = document.createElement("div");
+    div.className = "task-entry";
+    div.innerHTML = `${task.name} <button onclick="removeTask(${task.id})" style="float:right;">Eliminar</button>`;
+    div.onclick = () => showDetails(task);
+    taskListElement.appendChild(div);
+  });
+}
+
+function showDetails(task) {
+  detailElement.innerHTML = `
+    <h3>Detalles de ${task.name}</h3>
+    <ul>
+      <li><strong>GPUs:</strong> ${task.gpus}</li>
+      <li><strong>VRAM:</strong> ${task.vram} GB</li>
+      <li><strong>Tiempo estimado:</strong> ${task.time} días</li>
+      <li><strong>Horas de GPU:</strong> ${task.gpuHours}</li>
+      <li><strong>RAM:</strong> ${task.ram} GB</li>
+      <li><strong>Almacenamiento:</strong> ${task.storage} GB</li>
+      <li><strong>Tokens:</strong> ${task.tokens}M</li>
+    </ul>
+  `;
+}
+
+function removeTask(id) {
+  const index = taskList.findIndex(t => t.id === id);
+  if (index !== -1) {
+    taskList.splice(index, 1);
+    renderTasks();
+    detailElement.innerHTML = "";
+    updateSummary();
+  }
+}
+
+function updateSummary() {
+  const total = {
+    gpus: 0,
+    vram: 0,
+    time: 0,
+    gpuHours: 0,
+    ram: 0,
+    storage: 0,
+    tokens: 0
+  };
+
+  taskList.forEach(t => {
+    total.gpus = Math.max(total.gpus, t.gpus);
+    total.vram += t.vram;
+    total.time += t.time;
+    total.gpuHours += t.gpuHours;
+    total.ram += t.ram;
+    total.storage += t.storage;
+    total.tokens += t.tokens;
+  });
+
+  summaryElement.innerHTML = `
+    <table>
+      <tr><th>Recurso</th><th>Total</th></tr>
+      <tr><td>GPUs (máximo)</td><td>${total.gpus}</td></tr>
+      <tr><td>VRAM total</td><td>${total.vram} GB</td></tr>
+      <tr><td>Tiempo total</td><td>${total.time.toFixed(1)} días</td></tr>
+      <tr><td>Horas GPU</td><td>${total.gpuHours}</td></tr>
+      <tr><td>RAM total</td><td>${total.ram} GB</td></tr>
+      <tr><td>Almacenamiento</td><td>${(total.storage / 1024).toFixed(1)} TB</td></tr>
+      <tr><td>Tokens</td><td>${(total.tokens / 1000).toFixed(1)}B</td></tr>
+    </table>
+  `;
+}
+
+// Mostrar selector de modelo fuente si es distillation
+document.getElementById("task").addEventListener("change", function () {
+  document.getElementById("sourceLabel").style.display = this.value === "distillation" ? "inline-block" : "none";
+});
+</script>
+
+</body>
+</html>
