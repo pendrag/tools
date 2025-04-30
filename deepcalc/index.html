@@ -14,6 +14,7 @@
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { border: 1px solid #ccc; padding: 5px; text-align: left; }
   </style>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
 <body>
 
@@ -43,7 +44,9 @@
   </select>
 </label>
 
-<button onclick="addTask()">Añadir tarea</button>
+<button onclick="addTask()" title="Añadir tarea">
+  <i class="fas fa-plus"></i> <!-- FontAwesome icon for "add" -->
+</button>
 
 <div class="task-list">
   <h2>🧾​ Tareas añadidas</h2>
@@ -114,7 +117,10 @@ function renderTasks() {
   taskList.forEach(task => {
     const div = document.createElement("div");
     div.className = "task-entry";
-    div.innerHTML = `${task.name} <button onclick="removeTask(${task.id})" style="float:right;">Eliminar</button>`;
+    div.innerHTML = `${task.name} 
+  <button onclick="removeTask(${task.id})" style="float:right;" title="Eliminar tarea">
+    <i class="fas fa-trash"></i> <!-- FontAwesome icon for "delete" -->
+  </button>`;
     div.onclick = () => showDetails(task);
     taskListElement.appendChild(div);
   });
