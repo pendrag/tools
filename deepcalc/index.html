@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>Planificador de Tareas LLM</title>
-  <em>Grupo de investigación <a href="https://sinai.ujaen.es">SINAI</a></em>
   <style>
     body { font-family: sans-serif; padding: 20px; background: #f6f6f6; }
     label, select, button { margin: 5px; }
@@ -13,6 +12,11 @@
     .detail, .summary-table { margin-top: 10px; background: #fff; padding: 10px; border-radius: 5px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { border: 1px solid #ccc; padding: 5px; text-align: left; }
+    .footer {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+  }
   </style>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
@@ -59,6 +63,9 @@
   <h2>📈 Resumen total de recursos</h2>
   <div id="summaryTable"></div>
 </div>
+
+<hr />
+<em class="footer">Grupo de investigación <a href="https://sinai.ujaen.es">SINAI</a></em>
 
 <script>
 const presets = {
