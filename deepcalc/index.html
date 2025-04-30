@@ -157,10 +157,10 @@ function updateSummary() {
 
   taskList.forEach(t => {
     total.gpus = Math.max(total.gpus, t.gpus);
-    total.vram += t.vram;
+    total.vram = Math.max(total.vram, t.vram);
     total.time += t.time;
     total.gpuHours += t.gpuHours;
-    total.ram += t.ram;
+    total.ram += Math.max(total.ram, t.ram);
     total.storage += t.storage;
     total.tokens += t.tokens;
   });
